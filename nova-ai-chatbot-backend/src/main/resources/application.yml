@@ -1,5 +1,5 @@
 jwt:
-  secret: your_very_long_secret_key_at_least_32_characters
+  secret: your-super-long-random-secret-key-at-least-64-chars-2026
 
 spring:
   application:
