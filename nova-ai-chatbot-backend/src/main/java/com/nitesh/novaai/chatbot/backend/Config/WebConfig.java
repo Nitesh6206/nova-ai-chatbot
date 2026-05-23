@@ -1,4 +1,4 @@
-package com.nitesh.nova_ai_chatbot_backend.Config;
+package com.nitesh.novaai.chatbot.backend.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package com.nitesh.nova_ai_chatbot_backend;
+package com.nitesh.novaai.chatbot.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -9,5 +9,4 @@ class NovaAiChatbotBackendApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
