@@ -5,6 +5,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/nova-ai-chatbot/pom.xml" />
+        <option value="$PROJECT_DIR$/nova-ai-chatbot-backend/pom.xml" />
       </list>
     </option>
   </component>
