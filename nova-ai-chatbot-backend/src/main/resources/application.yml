@@ -1,6 +1,21 @@
+jwt:
+  secret: your_very_long_secret_key_at_least_32_characters
+
 spring:
   application:
     name: nova-ai-chatbot-backend
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${YOUR_GOOGLE_CLIENT_ID}
+            client-secret: ${YOUR_GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
 
   ai:
     google:
