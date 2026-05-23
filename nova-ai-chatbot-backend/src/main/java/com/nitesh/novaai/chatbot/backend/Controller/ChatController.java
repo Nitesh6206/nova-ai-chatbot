@@ -1,40 +1,67 @@
 package com.nitesh.novaai.chatbot.backend.Controller;
 
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nitesh.novaai.chatbot.backend.Entity.Conversation;
+import com.nitesh.novaai.chatbot.backend.Entity.Message;
+import com.nitesh.novaai.chatbot.backend.Service.AIService;
+import com.nitesh.novaai.chatbot.backend.Service.ChatService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/ai")
 public class ChatController {
 
-    private final ChatModel chatModel;
+    private final ChatService chatService;
+    private final AIService aiService;   // Tumhara existing AI service (Grok ya OpenAI)
 
-    @Autowired
-    public ChatController(ChatModel chatModel) {
-        this.chatModel = chatModel;
-    }
-
-    @GetMapping("/chat")
-    public String generate(
-            @RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
-        System.out.print("working till here");
-
-        return chatModel.call(message);
+    public ChatController(ChatService chatService, AIService aiService) {
+        this.chatService = chatService;
+        this.aiService = aiService;
     }
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("OK");
     }
 
-    @GetMapping("/profile")
-    public Object profile(@AuthenticationPrincipal OAuth2User user) {
-        return user.getAttributes();
+    @GetMapping("/chat")
+    public ResponseEntity<String> chat(
+            @RequestParam String message,
+            @RequestParam(required = false) Long conversationId,
+            Authentication authentication) {
+
+        String email = authentication.getName();
+
+        if (conversationId == null) {
+            Conversation newConv = chatService.getOrCreateConversation(email, null);
+            conversationId = newConv.getId();
+        }
+
+        // Save User Message
+        chatService.saveUserMessage(conversationId, message);
+
+        // Get AI Response
+        String aiResponse = aiService.getAIResponse(message);
+
+        // Save AI Message
+        chatService.saveAIMessage(conversationId, aiResponse);
+
+        return ResponseEntity.ok(aiResponse);
+    }
+
+
+    // Get All User Chats (Sidebar ke liye)
+    @GetMapping("/conversations")
+    public ResponseEntity<List<Conversation>> getConversations(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(chatService.getUserConversations(email));
+    }
+
+    // Get Messages of a Conversation
+    @GetMapping("/conversations/{conversationId}/messages")
+    public ResponseEntity<List<Message>> getMessages(@PathVariable Long conversationId) {
+        return ResponseEntity.ok(chatService.getConversationHistory(conversationId));
     }
 }
