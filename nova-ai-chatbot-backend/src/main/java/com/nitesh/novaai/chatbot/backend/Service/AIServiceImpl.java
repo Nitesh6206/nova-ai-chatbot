@@ -1,4 +1,4 @@
-package com.nitesh.novaai.chatbot.backend.Service.impl;
+package com.nitesh.novaai.chatbot.backend.Service;
 
 import com.nitesh.novaai.chatbot.backend.Entity.Message;
 import com.nitesh.novaai.chatbot.backend.Service.AIService;
