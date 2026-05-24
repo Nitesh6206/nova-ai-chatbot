@@ -5,6 +5,10 @@ spring:
   application:
     name: nova-ai-chatbot-backend
 
+
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: jdbc:postgresql://localhost:5432/nova_ai_db
     username: postgres
