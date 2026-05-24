@@ -1,5 +1,7 @@
 package com.nitesh.novaai.chatbot.backend.Config;
 
+import com.nitesh.novaai.chatbot.backend.Entity.User;
+import com.nitesh.novaai.chatbot.backend.Service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,9 +16,11 @@ import java.io.IOException;
 public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtService jwtService;
+    private final UserService userService;     // 🔥 Added
 
-    public OAuthSuccessHandler(JwtService jwtService) {
+    public OAuthSuccessHandler(JwtService jwtService, UserService userService) {
         this.jwtService = jwtService;
+        this.userService = userService;
     }
 
     @Override
@@ -25,20 +29,28 @@ public class OAuthSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException {
 
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-        String email = oauthUser.getAttribute("email");
 
+        String email = oauthUser.getAttribute("email");
+        String name = oauthUser.getAttribute("name");
+        String picture = oauthUser.getAttribute("picture");
+
+        // 🔥 User ko database mein save ya update kar do
+        userService.getOrCreateUser(email, name, picture);
+
+        // JWT Token generate karo
         String token = jwtService.generateToken(email);
 
+        // Cookie Setup
         Cookie cookie = new Cookie("jwt", token);
         cookie.setHttpOnly(true);
-        cookie.setSecure(false);        // Set true in production (HTTPS)
+        cookie.setSecure(false);           // Production mein true kar dena (HTTPS)
         cookie.setPath("/");
-        cookie.setMaxAge(86400);        // 24 hours
-        cookie.setAttribute("SameSite", "Lax"); // Important for OAuth flow
+        cookie.setMaxAge(86400);           // 24 hours
+        cookie.setAttribute("SameSite", "Lax");
 
         response.addCookie(cookie);
 
-        // Redirect to frontend with success flag
+        // Frontend pe redirect
         response.sendRedirect("http://localhost:3000?auth=success");
     }
 }
